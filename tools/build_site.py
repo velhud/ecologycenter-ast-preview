@@ -29,6 +29,89 @@ def p(text):
     return f"<p class=\"{para_class(text)}\">{h(text)}</p>"
 
 
+def render_specialty_list(blocks):
+    rows = []
+    for block in blocks:
+        match = re.match(r"^(\d+\.\d+\.\d+\.?)\s*(.*)$", str(block))
+        if match:
+            rows.append(f'<li class="specialty-row"><span>{h(match.group(1))}</span><strong>{h(match.group(2))}</strong></li>')
+        else:
+            rows.append(f'<li class="specialty-row"><strong>{h(block)}</strong></li>')
+    return f'<ul class="specialty-list">{"".join(rows)}</ul>'
+
+
+def render_template_rows(blocks):
+    rows = []
+    for block in blocks:
+        text = str(block)
+        if ":" in text and len(text) < 180:
+            label, value = text.split(":", 1)
+            rows.append(f'<div class="template-row"><span>{h(label + ":")}</span><strong>{h(value.strip() or " ")}</strong></div>')
+        else:
+            rows.append(f'<div class="template-row template-row--wide"><strong>{h(text)}</strong></div>')
+    return f'<div class="template-table">{"".join(rows)}</div>'
+
+
+def render_rule_group(title, blocks, kind="plain"):
+    if not blocks:
+        return ""
+    if kind == "specialties":
+        content = render_specialty_list(blocks)
+    elif kind == "template":
+        content = render_template_rows(blocks)
+    elif kind == "alerts":
+        content = '<div class="alert-stack">' + "".join(p(block) for block in blocks) + "</div>"
+    else:
+        content = "".join(p(block) for block in blocks)
+    return f'<div class="rule-group rule-group--{kind}"><h3>{h(title)}</h3>{content}</div>'
+
+
+def render_author_section(section):
+    sid = section.get("id")
+    blocks = section.get("blocks", [])
+    if sid == "status":
+        return (
+            render_rule_group("Название и статус журнала", blocks[:5])
+            + render_rule_group("Специальности ВАК", blocks[5:12], "specialties")
+            + render_rule_group("Справочная информация", blocks[12:])
+        )
+    if sid == "originality":
+        return render_rule_group("Обязательные проверки и ограничения", blocks, "alerts")
+    if sid == "format":
+        return (
+            render_rule_group("Что нельзя делать в файле", blocks[:1], "alerts")
+            + render_rule_group("Объем и параметры рукописи", blocks[1:3])
+            + render_rule_group("Таблицы, рисунки, фотографии и карты", blocks[3:11])
+            + render_rule_group("Цветные материалы и формат таблиц", blocks[11:], "alerts")
+        )
+    if sid == "references":
+        return (
+            render_rule_group("Правило оформления списка", blocks[:2])
+            + render_rule_group("Пример на русском и английском", blocks[2:], "template")
+        )
+    if sid == "template":
+        return (
+            render_rule_group("Русская часть шапки статьи", blocks[:13], "template")
+            + render_rule_group("Английская часть шапки статьи", blocks[13:], "template")
+        )
+    if sid == "submission":
+        return render_rule_group("Что отправить в редакцию", blocks, "alerts")
+    if sid == "review":
+        return (
+            render_rule_group("Рассмотрение статьи и лицензионное соглашение", blocks[:3])
+            + render_rule_group("Правила рецензирования", blocks[3:12])
+            + render_rule_group("Terms and conditions", blocks[12:])
+        )
+    if sid == "fees":
+        return (
+            render_rule_group("DOI", blocks[:3], "template")
+            + render_rule_group("Стоимость и льготы", blocks[3:], "alerts")
+        )
+    if sid == "contacts":
+        return render_rule_group("Адрес, email и телефон", blocks, "alerts")
+    return "".join(p(block) for block in blocks)
+
+
 def header(home, current, prefix):
     elib = home.get("elibraryUrl", "")
     return f"""<header class="topbar">
@@ -202,10 +285,11 @@ def build_authors(data):
     side = "".join(f'<a href="#{h(section.get("id"))}">{h(section.get("title"))}</a>' for section in sections)
     body_sections = []
     for section in sections:
-        blocks = "".join(p(block) for block in section.get("blocks", []))
+        blocks = render_author_section(section)
         body_sections.append(f'<section class="content-section" id="{h(section.get("id"))}"><div class="content-section__head"><h2>{h(section.get("title"))}</h2></div><div class="content-section__body">{blocks}</div></section>')
     body = f"""<section class="hero"><div class="hero__inner"><div><p class="eyebrow">Правила для авторов</p><h1>Как подготовить и отправить статью</h1><p class="lead">Требования к рукописям, пример оформления статьи, условия публикации, рецензирование и англоязычные сведения для авторов.</p></div><aside class="hero-card"><h2>Разделы правил</h2><p>Откройте нужный раздел, чтобы посмотреть требования к подготовке и отправке материалов в журнал.</p></aside></div></section>
-<section class="section"><div class="section__head"><h2>Правила для авторов</h2><p>Требования сгруппированы по смыслу: статус журнала, оформление рукописи, пример статьи, рецензирование и публикация.</p></div><div class="content-layout"><aside class="side-nav">{side}</aside><div class="content-flow">{''.join(body_sections)}</div></div></section>"""
+<section class="section section--tight"><div class="author-overview"><article><span>1</span><h3>Проверить соответствие</h3><p>Специальность ВАК, оригинальность, запрет на ИИ-тексты и повторные публикации.</p></article><article><span>2</span><h3>Подготовить файл</h3><p>Формат Word, поля, шрифт, таблицы, рисунки, подписи и список литературы.</p></article><article><span>3</span><h3>Оформить шапку</h3><p>Русские и английские сведения, аннотация, ключевые слова и данные для цитирования.</p></article><article><span>4</span><h3>Отправить и пройти рецензирование</h3><p>Комплект материалов, внешнее рецензирование, DOI, оплата и контакты редакции.</p></article></div></section>
+<section class="section"><div class="section__head"><h2>Подробные правила</h2><p>Текст сохранен из исходной страницы, но разделен по реальным задачам автора: от проверки соответствия до отправки материалов и публикации.</p></div><div class="content-layout"><aside class="side-nav">{side}</aside><div class="content-flow">{''.join(body_sections)}</div></div></section>"""
     write("authors.html", page(f'Правила для авторов | {home.get("title")}', "Требования к рукописям и условия публикации", "authors", home, body))
 
 
