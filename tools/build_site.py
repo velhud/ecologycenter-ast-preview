@@ -13,20 +13,20 @@ def h(value):
     return html.escape(str(value or ""), quote=True)
 
 
-def para_class(text):
+def para_class(text, suppress_small=False):
     text = str(text or "")
     upper = text.upper()
     if "Уважаемые" in text or "Внимание" in text or (len(text) > 80 and text == upper):
         return "content-paragraph content-paragraph--warning"
     if len(text) > 8 and text == upper:
         return "content-paragraph content-paragraph--strong"
-    if len(text) < 70:
+    if not suppress_small and len(text) < 70:
         return "content-paragraph content-paragraph--small"
     return "content-paragraph"
 
 
-def p(text):
-    return f"<p class=\"{para_class(text)}\">{h(text)}</p>"
+def p(text, suppress_small=False):
+    return f"<p class=\"{para_class(text, suppress_small)}\">{h(text)}</p>"
 
 
 def render_specialty_list(blocks):
@@ -34,7 +34,7 @@ def render_specialty_list(blocks):
     for block in blocks:
         match = re.match(r"^(\d+\.\d+\.\d+\.?)\s*(.*)$", str(block))
         if match:
-            rows.append(f'<li class="specialty-row"><span>{h(match.group(1))}</span><strong>{h(match.group(2))}</strong></li>')
+            rows.append(f'<li class="specialty-row"><span>{h(match.group(1))}</span> <strong>{h(match.group(2))}</strong></li>')
         else:
             rows.append(f'<li class="specialty-row"><strong>{h(block)}</strong></li>')
     return f'<ul class="specialty-list">{"".join(rows)}</ul>'
@@ -60,9 +60,9 @@ def render_rule_group(title, blocks, kind="plain"):
     elif kind == "template":
         content = render_template_rows(blocks)
     elif kind == "alerts":
-        content = '<div class="alert-stack">' + "".join(p(block) for block in blocks) + "</div>"
+        content = '<div class="alert-stack">' + "".join(p(block, suppress_small=True) for block in blocks) + "</div>"
     else:
-        content = "".join(p(block) for block in blocks)
+        content = "".join(p(block, suppress_small=True) for block in blocks)
     return f'<div class="rule-group rule-group--{kind}"><h3>{h(title)}</h3>{content}</div>'
 
 
@@ -71,8 +71,8 @@ def render_author_section(section):
     blocks = section.get("blocks", [])
     if sid == "status":
         return (
-            render_rule_group("Название и статус журнала", blocks[:5])
-            + render_rule_group("Специальности ВАК", blocks[5:12], "specialties")
+            render_rule_group("Название и статус журнала", blocks[:4])
+            + render_rule_group("Специальности ВАК", blocks[4:12], "specialties")
             + render_rule_group("Справочная информация", blocks[12:])
         )
     if sid == "originality":
@@ -104,8 +104,8 @@ def render_author_section(section):
         )
     if sid == "fees":
         return (
-            render_rule_group("DOI", blocks[:3], "template")
-            + render_rule_group("Стоимость и льготы", blocks[3:], "alerts")
+            render_rule_group("DOI", blocks[:1], "template")
+            + render_rule_group("Стоимость и льготы", blocks[1:], "alerts")
         )
     if sid == "contacts":
         return render_rule_group("Адрес, email и телефон", blocks, "alerts")

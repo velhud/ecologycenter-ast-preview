@@ -83,7 +83,6 @@ string C(string value) {
   if (String.IsNullOrEmpty(value)) return "content-paragraph";
   if (value.IndexOf("Уважаемые", StringComparison.OrdinalIgnoreCase) >= 0 || value.IndexOf("Внимание", StringComparison.OrdinalIgnoreCase) >= 0 || value.ToUpperInvariant() == value && value.Length > 80) return "content-paragraph content-paragraph--warning";
   if (value.ToUpperInvariant() == value && value.Length > 8) return "content-paragraph content-paragraph--strong";
-  if (value.Length < 70) return "content-paragraph content-paragraph--small";
   return "content-paragraph";
 }
 string P(string value) { return "<p class='" + C(value) + "'>" + H(value) + "</p>"; }
