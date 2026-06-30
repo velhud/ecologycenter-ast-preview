@@ -52,6 +52,53 @@ def render_template_rows(blocks):
     return f'<div class="template-table">{"".join(rows)}</div>'
 
 
+def render_template_layout(blocks):
+    ru = blocks[:13]
+    en = blocks[13:]
+    return (
+        '<div class="article-template">'
+        f'<p class="article-template__intro">{h(ru[0])}</p>'
+        '<article class="article-template__card">'
+        '<div class="article-template__journal">'
+        f'<strong>{h(ru[1])}</strong>'
+        f'<span>{h(ru[2])}</span>'
+        '</div>'
+        '<div class="article-template__chips">'
+        f'<span>{h(ru[3])}</span><span>{h(ru[4])}</span><span>{h(ru[5])}</span>'
+        '</div>'
+        f'<h3>{h(ru[6])}</h3>'
+        '<div class="article-template__meta">'
+        f'<p><span>Авторы</span>{h(ru[7])}</p>'
+        f'<p><span>Организация</span>{h(ru[8])}</p>'
+        f'<p><span>E-mail</span>{h(ru[9])}</p>'
+        '</div>'
+        '<div class="article-template__abstract">'
+        f'<p><span>{h(ru[10])}</span></p>'
+        f'<p><span>{h(ru[11])}</span></p>'
+        f'<p><span>{h(ru[12].split(":", 1)[0] + ":")}</span>{h(ru[12].split(":", 1)[1].strip() if ":" in ru[12] else ru[12])}</p>'
+        '</div>'
+        '</article>'
+        '<article class="article-template__card article-template__card--english">'
+        '<div class="article-template__chips">'
+        f'<span>{h(en[0])}</span><span>{h(en[1])}</span>'
+        '</div>'
+        f'<p class="article-template__label">{h(en[2])}</p>'
+        f'<h3>{h(en[3])}</h3>'
+        '<div class="article-template__meta">'
+        f'<p><span>Authors</span>{h(en[4])}</p>'
+        f'<p><span>Organization</span>{h(en[5])}</p>'
+        f'<p><span>E-mail</span>{h(en[6])}</p>'
+        '</div>'
+        '<div class="article-template__abstract">'
+        f'<p><span>{h(en[7])}</span></p>'
+        f'<p><span>{h(en[8])}</span></p>'
+        f'<p><span>{h(en[9].split(":", 1)[0] + ":")}</span>{h(en[9].split(":", 1)[1].strip() if ":" in en[9] else en[9])}</p>'
+        '</div>'
+        '</article>'
+        '</div>'
+    )
+
+
 def render_rule_group(title, blocks, kind="plain"):
     if not blocks:
         return ""
@@ -66,49 +113,171 @@ def render_rule_group(title, blocks, kind="plain"):
     return f'<div class="rule-group rule-group--{kind}"><h3>{h(title)}</h3>{content}</div>'
 
 
+def render_journal_identity(blocks):
+    return (
+        '<div class="journal-identity">'
+        f'<p class="journal-identity__name">{h(blocks[0])}</p>'
+        f'<p class="journal-identity__rules">{h(blocks[1])}</p>'
+        f'<p class="journal-identity__status">{h(blocks[2])}</p>'
+        f'<p class="journal-identity__notice">{h(blocks[3])}</p>'
+        "</div>"
+    )
+
+
+def render_fact_cards(items):
+    cards = []
+    for label, value in items:
+        cards.append(f'<article class="fact-card"><span>{h(label)}</span><strong>{h(value)}</strong></article>')
+    return f'<div class="fact-grid">{"".join(cards)}</div>'
+
+
+def render_forbidden_panel(text):
+    labels = ["Табуляция", "Разрыв страниц", "Обтекание рисунков и таблиц", "Таблицы как рисунки"]
+    chips = "".join(f"<span>{h(label)}</span>" for label in labels)
+    return (
+        '<div class="forbidden-panel">'
+        '<div><h3>В рукописи не допускаются</h3>'
+        f'<div class="forbidden-panel__chips">{chips}</div></div>'
+        f'<p>{h(text)}</p>'
+        "</div>"
+    )
+
+
+def render_manuscript_specs(volume_text, format_text):
+    return (
+        '<div class="spec-panel">'
+        f'<p class="spec-panel__lead">{h(volume_text)}</p>'
+        '<dl class="spec-grid">'
+        '<div><dt>Редактор</dt><dd>Word Windows</dd></div>'
+        '<div><dt>Шрифт</dt><dd>Times New Roman, 14</dd></div>'
+        '<div><dt>Интервал</dt><dd>1</dd></div>'
+        '<div><dt>Формат</dt><dd>А4</dd></div>'
+        '<div><dt>Поля</dt><dd>2 см со всех сторон</dd></div>'
+        '<div><dt>Красная строка</dt><dd>1,27 см</dd></div>'
+        '</dl>'
+        f'<p>{h(format_text)}</p>'
+        '</div>'
+    )
+
+
+def render_figure_table_examples(blocks):
+    examples = "".join(f'<div class="example-frame__line">{h(block)}</div>' for block in blocks)
+    return (
+        '<div class="example-frame">'
+        '<p class="example-frame__label">Пример подписей</p>'
+        f'{examples}'
+        '</div>'
+    )
+
+
+def render_reference_examples(blocks):
+    return (
+        '<div class="reference-examples">'
+        f'<article><span>{h(blocks[0])}</span><h4>{h(blocks[1])}</h4><p>{h(blocks[2])}</p></article>'
+        f'<article><span>{h(blocks[3])}</span><p>{h(blocks[4])}</p><em>{h(blocks[5])}</em></article>'
+        '</div>'
+    )
+
+
+def render_submission_pack(text):
+    items = ["Заявка на публикацию", "Текст статьи", "Иллюстрации и таблицы", "Сканированная рецензия доктора наук", "Самостоятельная проверка на антиплагиат"]
+    checklist = "".join(f"<li>{h(item)}</li>" for item in items)
+    return f'<div class="submission-pack"><ul>{checklist}</ul><p>{h(text)}</p></div>'
+
+
+def render_review_layout(blocks):
+    intro = "".join(p(block, suppress_small=True) for block in blocks[:3])
+    formal_ru = "".join(p(block, suppress_small=True) for block in blocks[6:9])
+    signature = (
+        '<div class="signature-card">'
+        f'<span>{h(blocks[9])}</span>'
+        f'<strong>{h(blocks[10])}</strong>'
+        '</div>'
+    )
+    formal_en = "".join(p(block, suppress_small=True) for block in blocks[13:17])
+    signature_en = (
+        '<div class="signature-card signature-card--english">'
+        f'<span>{h(blocks[17])}</span>'
+        f'<strong>{h(blocks[18])}</strong>'
+        f'<p>{h(blocks[19])}</p><p>{h(blocks[20])}</p>'
+        '</div>'
+    )
+    return (
+        '<div class="review-layout">'
+        f'<div class="rule-group"><h3>Решение по статье</h3>{intro}</div>'
+        '<div class="review-card review-card--ru">'
+        f'<h3>{h(blocks[3])}</h3>'
+        '<div class="review-facts">'
+        f'<article><span>Индекс</span><strong>{h(blocks[4])}</strong></article>'
+        f'<article><span>История</span><strong>{h(blocks[5])}</strong></article>'
+        '</div>'
+        f'{formal_ru}{signature}</div>'
+        '<div class="review-card review-card--en">'
+        f'<p class="review-card__kicker">{h(blocks[11])}</p>'
+        f'<h3>{h(blocks[12])}</h3>'
+        f'{formal_en}{signature_en}</div>'
+        '</div>'
+    )
+
+
+def render_fee_layout(blocks):
+    return (
+        '<div class="fee-layout">'
+        '<div class="fee-grid">'
+        f'<article><span>Стоимость страницы</span><strong>1300 руб.</strong><p>{h(blocks[1])}</p></article>'
+        f'<article><span>DOI</span><strong>600 руб.</strong><p>{h(blocks[0])}</p><p>{h(blocks[2])}</p></article>'
+        '</div>'
+        f'<div class="rule-group rule-group--alerts"><h3>Льготы и порядок оплаты</h3><div class="alert-stack">{p(blocks[3], suppress_small=True)}{p(blocks[4], suppress_small=True)}</div></div>'
+        '</div>'
+    )
+
+
+def render_contacts(text):
+    return (
+        '<div class="contact-cards">'
+        '<article><span>Адрес редакции</span><strong>414018, Астрахань, ул. Архитектурная, д. 14</strong><p>Чуйкову Ю.С.</p></article>'
+        '<article><span>Электронная почта</span><strong><a href="mailto:us.chuikov@mail.ru">us.chuikov@mail.ru</a></strong></article>'
+        '<article><span>Телефон</span><strong><a href="tel:+79086111581">8-908-611-15-81</a></strong></article>'
+        '</div>'
+        f'<details class="source-line"><summary>Запись редакции</summary><p>{h(text)}</p></details>'
+    )
+
+
 def render_author_section(section):
     sid = section.get("id")
     blocks = section.get("blocks", [])
     if sid == "status":
         return (
-            render_rule_group("Название и статус журнала", blocks[:4])
+            render_journal_identity(blocks[:4])
             + render_rule_group("Специальности ВАК", blocks[4:12], "specialties")
-            + render_rule_group("Справочная информация", blocks[12:])
+            + render_fact_cards([("Индекс", blocks[12]), ("История", blocks[13]), ("Профиль", "РИНЦ / eLibrary.ru")])
+            + render_rule_group("Тематика и типы материалов", blocks[14:])
         )
     if sid == "originality":
         return render_rule_group("Обязательные проверки и ограничения", blocks, "alerts")
     if sid == "format":
         return (
-            render_rule_group("Что нельзя делать в файле", blocks[:1], "alerts")
-            + render_rule_group("Объем и параметры рукописи", blocks[1:3])
-            + render_rule_group("Таблицы, рисунки, фотографии и карты", blocks[3:11])
+            render_forbidden_panel(blocks[0])
+            + render_manuscript_specs(blocks[1], blocks[2])
+            + render_rule_group("Таблицы, рисунки, фотографии и карты", blocks[3:7])
+            + render_figure_table_examples(blocks[7:11])
             + render_rule_group("Цветные материалы и формат таблиц", blocks[11:], "alerts")
         )
     if sid == "references":
         return (
             render_rule_group("Правило оформления списка", blocks[:2])
-            + render_rule_group("Пример на русском и английском", blocks[2:], "template")
+            + render_reference_examples(blocks[2:])
         )
     if sid == "template":
-        return (
-            render_rule_group("Русская часть шапки статьи", blocks[:13], "template")
-            + render_rule_group("Английская часть шапки статьи", blocks[13:], "template")
-        )
+        return render_template_layout(blocks)
     if sid == "submission":
-        return render_rule_group("Что отправить в редакцию", blocks, "alerts")
+        return render_submission_pack(blocks[0])
     if sid == "review":
-        return (
-            render_rule_group("Рассмотрение статьи и лицензионное соглашение", blocks[:3])
-            + render_rule_group("Правила рецензирования", blocks[3:12])
-            + render_rule_group("Terms and conditions", blocks[12:])
-        )
+        return render_review_layout(blocks)
     if sid == "fees":
-        return (
-            render_rule_group("DOI", blocks[:1], "template")
-            + render_rule_group("Стоимость и льготы", blocks[1:], "alerts")
-        )
+        return render_fee_layout(blocks)
     if sid == "contacts":
-        return render_rule_group("Адрес, email и телефон", blocks, "alerts")
+        return render_contacts(blocks[0])
     return "".join(p(block) for block in blocks)
 
 
@@ -288,8 +457,8 @@ def build_authors(data):
         blocks = render_author_section(section)
         body_sections.append(f'<section class="content-section" id="{h(section.get("id"))}"><div class="content-section__head"><h2>{h(section.get("title"))}</h2></div><div class="content-section__body">{blocks}</div></section>')
     body = f"""<section class="hero"><div class="hero__inner"><div><p class="eyebrow">Правила для авторов</p><h1>Как подготовить и отправить статью</h1><p class="lead">Требования к рукописям, пример оформления статьи, условия публикации, рецензирование и англоязычные сведения для авторов.</p></div><aside class="hero-card"><h2>Разделы правил</h2><p>Откройте нужный раздел, чтобы посмотреть требования к подготовке и отправке материалов в журнал.</p></aside></div></section>
-<section class="section section--tight"><div class="author-overview"><article><span>1</span><h3>Проверить соответствие</h3><p>Специальность ВАК, оригинальность, запрет на ИИ-тексты и повторные публикации.</p></article><article><span>2</span><h3>Подготовить файл</h3><p>Формат Word, поля, шрифт, таблицы, рисунки, подписи и список литературы.</p></article><article><span>3</span><h3>Оформить шапку</h3><p>Русские и английские сведения, аннотация, ключевые слова и данные для цитирования.</p></article><article><span>4</span><h3>Отправить и пройти рецензирование</h3><p>Комплект материалов, внешнее рецензирование, DOI, оплата и контакты редакции.</p></article></div></section>
-<section class="section"><div class="section__head"><h2>Подробные правила</h2><p>Текст сохранен из исходной страницы, но разделен по реальным задачам автора: от проверки соответствия до отправки материалов и публикации.</p></div><div class="content-layout"><aside class="side-nav">{side}</aside><div class="content-flow">{''.join(body_sections)}</div></div></section>"""
+<section class="section section--tight"><div class="author-overview"><article><span>1</span><h3>Проверить соответствие</h3><p>Специальность ВАК, оригинальность, запрет на ИИ-тексты и повторные публикации.</p></article><article><span>2</span><h3>Подготовить файл</h3><p>Формат Word, поля, шрифт, таблицы, рисунки, подписи и список литературы.</p></article><article><span>3</span><h3>Оформить шапку</h3><p>Русские и английские сведения, аннотация, ключевые слова и данные для цитирования.</p></article><article><span>4</span><h3>Отправить и пройти рецензирование</h3><p>Комплект материалов, внешнее рецензирование, оплата, индекс статьи и контакты редакции.</p></article></div></section>
+<section class="section"><div class="section__head"><h2>Подробные правила</h2><p>Правила сгруппированы по реальным задачам автора: от проверки соответствия до отправки материалов и публикации.</p></div><div class="content-layout"><aside class="side-nav">{side}</aside><div class="content-flow">{''.join(body_sections)}</div></div></section>"""
     write("authors.html", page(f'Правила для авторов | {home.get("title")}', "Требования к рукописям и условия публикации", "authors", home, body))
 
 
