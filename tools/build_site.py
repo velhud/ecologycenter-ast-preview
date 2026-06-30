@@ -29,40 +29,41 @@ def p(text):
     return f"<p class=\"{para_class(text)}\">{h(text)}</p>"
 
 
-def header(home, current):
+def header(home, current, prefix):
     elib = home.get("elibraryUrl", "")
     return f"""<header class="topbar">
   <div class="topbar__inner">
-    <a class="brand" href="/">
-      <img src="/img/logo.png" alt="" class="brand__logo">
+    <a class="brand" href="{prefix}index.html">
+      <img src="{prefix}img/logo.png" alt="" class="brand__logo">
       <span><strong>{h(home.get("title"))}</strong><small>научно-практический журнал</small></span>
     </a>
     <nav class="nav" aria-label="Основная навигация">
-      <a href="/"{" aria-current=\"page\"" if current == "home" else ""}>Главная</a>
-      <a href="/authors.html"{" aria-current=\"page\"" if current == "authors" else ""}>Для авторов</a>
-      <a href="/issues.html"{" aria-current=\"page\"" if current == "issues" else ""}>Издания</a>
-      <a href="/#contacts">Контакты</a>
+      <a href="{prefix}index.html"{" aria-current=\"page\"" if current == "home" else ""}>Главная</a>
+      <a href="{prefix}authors.html"{" aria-current=\"page\"" if current == "authors" else ""}>Для авторов</a>
+      <a href="{prefix}issues.html"{" aria-current=\"page\"" if current == "issues" else ""}>Издания</a>
+      <a href="{prefix}index.html#contacts">Контакты</a>
       <a href="{h(elib)}" target="_blank" rel="noopener">eLibrary</a>
     </nav>
   </div>
 </header>"""
 
 
-def footer(home):
+def footer(home, prefix):
     elib = home.get("elibraryUrl", "")
     email = home.get("contactEmail", "")
     return f"""<footer class="site-footer">
   <div class="footer-card">
     <p class="footer-title">{h(home.get("title"))}</p>
     <nav class="footer-nav" aria-label="Навигация в подвале">
-      <a href="/">Главная</a><span></span><a href="/authors.html">Для авторов</a><span></span><a href="/issues.html">Издания</a><span></span><a href="/#contacts">Контакты</a><span></span><a href="{h(elib)}" target="_blank" rel="noopener">eLibrary</a>
+      <a href="{prefix}index.html">Главная</a><span></span><a href="{prefix}authors.html">Для авторов</a><span></span><a href="{prefix}issues.html">Издания</a><span></span><a href="{prefix}index.html#contacts">Контакты</a><span></span><a href="{h(elib)}" target="_blank" rel="noopener">eLibrary</a>
     </nav>
     <p class="footer-contact"><a href="mailto:{h(email)}">{h(email)}</a></p>
   </div>
 </footer>"""
 
 
-def page(title, desc, current, home, body):
+def page(title, desc, current, home, body, depth=0):
+    prefix = "../" * depth
     return f"""<!doctype html>
 <html lang="ru">
 <head>
@@ -70,14 +71,14 @@ def page(title, desc, current, home, body):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{h(title)}</title>
   <meta name="description" content="{h(desc)}">
-  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="{prefix}css/site.css">
 </head>
 <body>
-{header(home, current)}
+{header(home, current, prefix)}
 <main>
 {body}
 </main>
-{footer(home)}
+{footer(home, prefix)}
 </body>
 </html>
 """
@@ -170,7 +171,7 @@ def build_home(data):
 </section>
 <section class="section home-panel"><div class="stat-strip"><div class="stat"><strong>2025</strong><span>актуальные выпуски</span></div><div class="stat"><strong>{h(latest)}</strong><span>последний выпуск</span></div><div class="stat"><strong>{h(home.get("foundedYear"))}</strong><span>год начала издания журнала</span></div></div></section>
 <section class="section section--tight"><div class="section__head"><h2>О журнале</h2><p>«Астраханский вестник экологического образования» входит в перечень цитируемых в РИНЦ и размещается в полнотекстовом формате на eLibrary.ru.</p></div><div class="grid grid--three"><article class="card"><h3>Тематика</h3><p>Науки о Земле, биологические науки, экологическое образование, экология, природопользование и охрана окружающей среды.</p></article><article class="card"><h3>Материалы</h3><p>Теоретические и обзорные статьи, научные сообщения, краткие сообщения, рецензии, библиография, информация о конференциях и юбилейных датах.</p></article><article class="card"><h3>Периодичность</h3><p>Периодичность издания - до 6 раз в год. Язык издания - русский. Публикуются материалы, ранее не публиковавшиеся в других изданиях.</p></article></div></section>
-<section class="section section--tight"><div class="section__head"><h2>Основные разделы</h2><p>Для авторов подготовлены требования к рукописям, пример оформления статьи, порядок рецензирования и условия публикации. В разделе «Издания» собраны аннотации выпусков и данные для цитирования.</p></div><div class="grid"><article class="card feature-link"><h3>Правила для авторов</h3><p>Требования к структуре рукописи, оформлению литературы, таблиц, рисунков, DOI, рецензированию и порядку публикации.</p><a class="button button--primary" href="/authors.html">Открыть правила</a></article><article class="card feature-link"><h3>Издания</h3><p>Последний опубликованный на сайте выпуск: {h(latest)}. Полные тексты статей размещены на eLibrary.ru.</p><a class="button button--primary" href="/issues.html">Смотреть издания</a></article></div></section>
+<section class="section section--tight"><div class="section__head"><h2>Основные разделы</h2><p>Для авторов подготовлены требования к рукописям, пример оформления статьи, порядок рецензирования и условия публикации. В разделе «Издания» собраны аннотации выпусков и данные для цитирования.</p></div><div class="grid"><article class="card feature-link"><h3>Правила для авторов</h3><p>Требования к структуре рукописи, оформлению литературы, таблиц, рисунков, DOI, рецензированию и порядку публикации.</p><a class="button button--primary" href="authors.html">Открыть правила</a></article><article class="card feature-link"><h3>Издания</h3><p>Последний опубликованный на сайте выпуск: {h(latest)}. Полные тексты статей размещены на eLibrary.ru.</p><a class="button button--primary" href="issues.html">Смотреть издания</a></article></div></section>
 <section class="section section--tight"><div class="process"><div class="process__intro"><h2>Публикация статьи</h2><p>Редакция принимает оригинальные материалы, ранее не публиковавшиеся в других изданиях. Перед отправкой статьи автору необходимо проверить оформление рукописи и комплект сопроводительных материалов.</p></div><ol class="process-list"><li><span>1</span><div><strong>Подготовить рукопись.</strong><br>Проверить структуру статьи, аннотацию, ключевые слова, список литературы, таблицы и рисунки.</div></li><li><span>2</span><div><strong>Отправить материалы.</strong><br>Направить статью и сведения об авторах в редакцию журнала.</div></li><li><span>3</span><div><strong>Пройти рассмотрение.</strong><br>Редакция рассматривает материал, направляет замечания или согласует публикацию.</div></li><li><span>4</span><div><strong>Смотреть выпуск.</strong><br>Аннотации публикуются на сайте, полные тексты размещаются на eLibrary.ru.</div></li></ol></div></section>
 <section class="section" id="contacts">
   <div class="contact-panel">
@@ -213,7 +214,7 @@ def build_issues(data):
     issues = data.get("issues", [])
     cards = []
     for issue in issues:
-        cards.append(f'<article class="issue-card"><p class="eyebrow">Выпуск</p><h2>{h(issue.get("label"))}</h2><p>{len(issue.get("articles", []))} статей</p><a class="button button--primary" href="/issues/{h(issue.get("slug"))}.html">Открыть выпуск</a></article>')
+        cards.append(f'<article class="issue-card"><p class="eyebrow">Выпуск</p><h2>{h(issue.get("label"))}</h2><p>{len(issue.get("articles", []))} статей</p><a class="button button--primary" href="issues/{h(issue.get("slug"))}.html">Открыть выпуск</a></article>')
     body = f"""<section class="hero"><div class="hero__inner"><div><p class="eyebrow">Издания</p><h1>Последние выпуски</h1><p class="lead">Аннотации статей, ключевые слова и данные для цитирования. Полные тексты размещены на eLibrary.ru.</p></div><aside class="hero-card"><h2>{len(issues)} выпусков</h2><p><a href="{h(home.get("elibraryUrl"))}" target="_blank" rel="noopener">Страница журнала на eLibrary.ru</a></p></aside></div></section>
 <section class="section"><div class="issue-grid">{''.join(cards)}</div></section>"""
     write("issues.html", page(f'Издания | {home.get("title")}', "Аннотации выпусков журнала", "issues", home, body))
@@ -224,9 +225,9 @@ def build_issues(data):
         for i, article in enumerate(articles, 1):
             blocks = "".join(p(block) for block in article.get("blocks", []))
             article_html.append(f'<article class="article-card" id="article-{i}"><div class="article-card__head"><span>{i}</span><h2>{h(article.get("title"))}</h2></div><div class="article-card__body">{blocks}</div></article>')
-        body = f"""<section class="hero"><div class="hero__inner"><div><p class="eyebrow">Выпуск</p><h1>{h(issue.get("label"))}</h1><p class="lead">Аннотации статей, ключевые слова и данные для цитирования.</p></div><aside class="hero-card"><h2>{len(articles)} статей</h2><p><a href="/issues.html">Вернуться к списку выпусков</a></p></aside></div></section>
-<section class="section"><div class="issue-toolbar"><a class="button" href="/issues.html">Все выпуски</a><nav aria-label="Статьи выпуска">{nav}</nav></div><div class="article-list">{''.join(article_html)}</div></section>"""
-        write(f'issues/{issue.get("slug")}.html', page(f'{issue.get("label")} | {home.get("title")}', f'Аннотации выпуска {issue.get("label")}', "issues", home, body))
+        body = f"""<section class="hero"><div class="hero__inner"><div><p class="eyebrow">Выпуск</p><h1>{h(issue.get("label"))}</h1><p class="lead">Аннотации статей, ключевые слова и данные для цитирования.</p></div><aside class="hero-card"><h2>{len(articles)} статей</h2><p><a href="../issues.html">Вернуться к списку выпусков</a></p></aside></div></section>
+<section class="section"><div class="issue-toolbar"><a class="button" href="../issues.html">Все выпуски</a><nav aria-label="Статьи выпуска">{nav}</nav></div><div class="article-list">{''.join(article_html)}</div></section>"""
+        write(f'issues/{issue.get("slug")}.html', page(f'{issue.get("label")} | {home.get("title")}', f'Аннотации выпуска {issue.get("label")}', "issues", home, body, depth=1))
 
 
 def main():
