@@ -239,7 +239,6 @@ def render_contacts(text):
         '<article><span>Электронная почта</span><strong><a href="mailto:us.chuikov@mail.ru">us.chuikov@mail.ru</a></strong></article>'
         '<article><span>Телефон</span><strong><a href="tel:+79086111581">8-908-611-15-81</a></strong></article>'
         '</div>'
-        f'<details class="source-line"><summary>Запись редакции</summary><p>{h(text)}</p></details>'
     )
 
 
